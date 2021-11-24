@@ -17,21 +17,29 @@ SETTING_CODE = ['fld']
 
 
 # Logger Template in system
-PROJECTION_LENS_BASIC_TEMPLATE = {
-    CHANGE_NOTE: {"target": None, "method": None, "summary": None},
-    ENVIRONMENT: {
-        "sensor": None,
-        "format_v": None,
-        "format_h": None,
-        "pixel_size": None,
-        "cra_imh": None,
-    },
-    DATA: {
-        "dfov": None,
-        "hfov": None,
-        "vfov": None,
-        "mtfs": None,
-        "mtft": None,
-        "cra": None,
+LOGGER_TEMPLATE = {
+    "usage": "PROJECTION_LENS",
+    "engine": "pyzdde",
+    "template": {
+        "PROJECTION_LENS": {
+            "file": {"file": None},
+            "change_note": {"target": None, "method": None, "summary": None},
+            "environment": {
+                "sensor": None,
+                "format_v": None,
+                "format_h": None,
+                "pixel_size": None,
+                "cra_imh": None,
+            },
+            "data": {
+                "dfov": None,
+                "hfov": None,
+                "vfov": None,
+                "mtfs": None,
+                "mtft": None,
+                "cra": None,
+            },
+        },
+        "COSTUME": {"change_note": {}, "environment": {}, "data": {}},
     },
 }
