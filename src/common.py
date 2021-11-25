@@ -1,9 +1,10 @@
 import json
+import sys
 from pathlib import Path
 
 
 def load_json_data(json_file):
-    with open(json_file, 'r', encoding="utf-8") as f:
+    with open(json_file, "r", encoding="utf-8") as f:
         data = json.load(f)
     return data
 
@@ -27,8 +28,9 @@ def find_optical_repo_path():
         current_path = current_path.parent
     if current_path.joinpath(".optical_git").exists():
         return current_path.joinpath(".optical_git")
-    sys.exit("Cannot find .optical_git")
+    raise FileNotFoundError
+    # sys.exit("Cannot find .optical_git")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     pass

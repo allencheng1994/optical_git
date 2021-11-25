@@ -17,8 +17,8 @@ def repo_init(template):
     Path.mkdir(rep_path)
     for key_name in template:
         json_file = rep_path.joinpath(key_name + ".json")
-        with open(json_file, 'w', encoding='utf-8') as f:
-            json.dump(template[key_name], f)
+        with open(json_file, "w", encoding="utf-8") as jfile:
+            json.dump(template[key_name], jfile)
 
 
 def repo_show_files():
@@ -33,10 +33,10 @@ def repo_show_items(file_name):
     rep_path = find_optical_repo_path()
     file_name = file_name.lower()
     json_file = rep_path.joinpath(file_name + ".json")
-    with open(json_file, 'r', encoding='utf-8') as f:
-        data = json.load(f)
+    with open(json_file, "r", encoding="utf-8") as jfile:
+        data = json.load(jfile)
     for key in data:
-        print(f'{key}: {data[key]}')
+        print(f"{key}: {data[key]}")
 
 
 def repo_add_file(file):
@@ -48,10 +48,10 @@ def repo_add_file(file):
     json_file = rep_path.joinpath(file + ".json")
     if not json_file.exists():
         data = {}
-        with open(json_file, 'w', encoding='utf-8') as f:
-            json.dump(data, f)
+        with open(json_file, "w", encoding="utf-8") as jfile:
+            json.dump(data, jfile)
     else:
-        print(f'{file} exists.')
+        print(f"{file} exists.")
 
 
 def repo_add_item(file, item):
@@ -59,18 +59,18 @@ def repo_add_item(file, item):
     file = file.lower()
     item = item.lower()
     json_file = rep_path.joinpath(file + ".json")
-    with open(json_file, 'r', encoding='utf-8') as f:
-        data = json.load(f)
+    with open(json_file, "r", encoding="utf-8") as jfile:
+        data = json.load(jfile)
     data.setdefault(item)
-    with open(json_file, 'w', encoding='utf-8') as f:
-        json.dump(data, f)
+    with open(json_file, "w", encoding="utf-8") as jfile:
+        json.dump(data, jfile)
 
 
 def repo_modify(file, item, val_str):
     rep_path = find_optical_repo_path()
     file = file.lower()
     if file in config.ONLY_PROGRAM:
-        exit_msg = f'The value in {file} should not be changed by using modify.'
+        exit_msg = f"The value in {file} should not be changed by using modify."
         sys.exit(exit_msg)
     if item == "file":
         exit_msg = (
@@ -80,13 +80,13 @@ def repo_modify(file, item, val_str):
         sys.exit(exit_msg)
     item = item.lower()
     json_file = rep_path.joinpath(file + ".json")
-    with open(json_file, 'r', encoding='utf-8') as f:
-        data = json.load(f)
+    with open(json_file, "r", encoding="utf-8") as jfile:
+        data = json.load(jfile)
     if item not in data:
-        raise KeyError(f'{item} is not in data.')
+        raise KeyError(f"{item} is not in data.")
     data[item] = val_str
-    with open(json_file, 'w', encoding='utf-8') as f:
-        json.dump(data, f)
+    with open(json_file, "w", encoding="utf-8") as jfile:
+        json.dump(data, jfile)
 
 
 def repo_rm_file(file):
@@ -101,11 +101,11 @@ def repo_rm_item(file, item):
     file = file.lower()
     item = item.lower()
     json_file = rep_path.joinpath(file + ".json")
-    with open(json_file, 'r', encoding='utf-8') as f:
-        data = json.load(f)
+    with open(json_file, "r", encoding="utf-8") as jfile:
+        data = json.load(jfile)
     data.pop(item)
-    with open(json_file, 'w', encoding='utf-8') as f:
-        json.dump(data, f)
+    with open(json_file, "w", encoding="utf-8") as jfile:
+        json.dump(data, jfile)
 
 
 def repo_collect():
@@ -116,12 +116,12 @@ def repo_collect():
     for file in json_files:
         if file != log_file:
             name = re.sub(".json", "", file.name)
-            with open(file, 'r', encoding='utf-8') as f:
-                data = json.load(f)
+            with open(file, "r", encoding="utf-8") as jfile:
+                data = json.load(jfile)
                 whole_data.setdefault(name, data)
 
-    with open(log_file, 'w', encoding='utf-8') as f:
-        json.dump(whole_data, f)
+    with open(log_file, "w", encoding="utf-8") as jfile:
+        json.dump(whole_data, jfile)
 
 
 def repo_change_tracking_file(file):
@@ -130,17 +130,20 @@ def repo_change_tracking_file(file):
     file_path = Path(os.path.abspath(file))
     if folder not in file_path.parents:
         sys.exit(
-            f'You should initialize the repository first. Your repository parent folder'
-            f' should be the parent of the lens file.'
+            """
+            You should initialize the repository first. 
+            Your repository parent folder should be the 
+            parent of the lens file.
+            """
         )
 
     json_file = rep_path.joinpath("file.json")
-    with open(json_file, 'r', encoding='utf-8') as f:
-        data = json.load(f)
-    data['file'] = str(file_path.absolute())
-    with open(json_file, 'w', encoding='utf-8') as f:
-        json.dump(data, f)
+    with open(json_file, "r", encoding="utf-8") as jfile:
+        data = json.load(jfile)
+    data["file"] = str(file_path.absolute())
+    with open(json_file, "w", encoding="utf-8") as jfile:
+        json.dump(data, jfile)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     pass
