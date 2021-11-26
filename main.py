@@ -18,17 +18,12 @@ def go_extracting(args):
 
 
 def go_testing(args):
-    lens_test_case.exc_lens_test()
+    lens_test_case.exc_projection_lens_test()
 
 
 def repository_initialize(args):
-    templates = load_json_data(config.USR_CONFIG)["criterion"]
-    rep_manipulator.create_lens_template(templates[args.criterion])
-
-
-def test_criterion_init(args):
-    templates = load_json_data(config.USR_CONFIG)["template"]
-    rep_manipulator.repo_init(templates[args.template])
+    setting_templates = load_json_data(config.USR_CONFIG)
+    rep_manipulator.repo_init(setting_templates["template"].get(args.template))
 
 
 def repository_show(args):
@@ -93,7 +88,6 @@ def main():
             json.dump(data, f)
 
     template_choices = list(setting_templates["template"].keys())
-    case_lens_test_template = list(setting_templates["criterion"].keys())
 
     parser = argparse.ArgumentParser()
     subparsers = parser.add_subparsers()
@@ -119,7 +113,6 @@ def main():
     parser_trackfile = subparsers.add_parser(
         "trackfile", help="Change the tracking design."
     )
-    parser_criterion = subparsers.add_parser("criterion", help="add the criterion.")
     parser_testing = subparsers.add_parser("test", help="Executing the test.")
 
     parser_init.add_argument(

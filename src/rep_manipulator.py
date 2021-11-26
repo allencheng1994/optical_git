@@ -6,6 +6,7 @@ from pathlib import Path
 from . import config
 from .common import exist_optical_repo
 from .common import find_optical_repo_path
+from .config import CONST
 
 
 def repo_init(template):
@@ -84,7 +85,9 @@ def repo_modify(file, item, val_str):
         data = json.load(jfile)
     if item not in data:
         raise KeyError(f"{item} is not in data.")
-    data[item] = val_str
+
+    data[item] = float(val_str) if val_str.isnumeric() else val_str
+
     with open(json_file, "w", encoding="utf-8") as jfile:
         json.dump(data, jfile)
 
@@ -110,11 +113,12 @@ def repo_rm_item(file, item):
 
 def repo_collect():
     rep_path = find_optical_repo_path()
-    log_file = rep_path.joinpath(config.LOG + ".json")
+    log_file = rep_path.joinpath(CONST["LOG"] + ".json")
+    criterion_file = rep_path.joinpath(CONST["CRITERION"] + ".json")
     json_files = list(rep_path.glob(r"*.json"))
     whole_data = {}
     for file in json_files:
-        if file != log_file:
+        if file != log_file or file != criterion_file:
             name = re.sub(".json", "", file.name)
             with open(file, "r", encoding="utf-8") as jfile:
                 data = json.load(jfile)

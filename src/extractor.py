@@ -3,6 +3,7 @@ import math
 from ZOS_DDE.zemax_pyzdde import Zemax14
 from .common import load_json_data
 from .common import find_optical_repo_path
+from .config import CONST
 
 
 class ProjectionLensEnvironment:
@@ -13,10 +14,10 @@ class ProjectionLensEnvironment:
 
     def __init__(self):
         repo = find_optical_repo_path()
-        data = load_json_data(repo.joinpath("environment.json"))
-        self._format_v = float(data["format_v"])
-        self._format_h = float(data["format_h"])
-        self._pixel_size = float(data["pixel_size"])
+        data = load_json_data(repo.joinpath(CONST["ENVIRONMENT"] + ".json"))
+        self._format_v = data["format_v"]
+        self._format_h = data["format_h"]
+        self._pixel_size = data["pixel_size"]
         self._type = data["process_type"].lower()
 
         self._imh = (
@@ -55,6 +56,7 @@ class ZDDEProjectionLensDataExtractor(ProjectionLensEnvironment):
         ProjectionLensEnvironment.__init__(self)
         self.__system_info = self.__zfile.zGetSystem()
         self.__primary_wave_id = self.__zfile.zGetWave(0)[0]
+        self.__nwave = self.__zfile.zGetSystemProperty(201)
         self.__nsur = self.__system_info[0]
         self.__nfield = 11
 
@@ -125,6 +127,9 @@ class ZDDEProjectionLensDataExtractor(ProjectionLensEnvironment):
     def __get_fno(self):
         return self.__zfile.zGetSystemAper()[2]
 
+    def __get_wfno(self):
+        return self.__zfile.zOperandValue("WFNO", 0, 0, 0, 0, 0, 0)
+
     def __get_ri(self):
         return self.__zfile.zOperandValue(
             "RELI", 20, self.__primary_wave_id, self.__nfield, 1, 0, 0
@@ -160,6 +165,24 @@ class ZDDEProjectionLensDataExtractor(ProjectionLensEnvironment):
         ]
         return abs(max(data) - min(data))
 
+    def __get_lacl_f11(self):
+        data = [
+            abs(
+                self.__zfile.zOperandValue(
+                    "REAY", self.__nsur, self.__primary_wave_id, 0, 1, 0, 0
+                )
+                - self.__zfile.zOperandValue("REAY", self.__nsur, i, 0, 1, 0, 0)
+                for i in range(1, self.__nwave + 1)
+            )
+        ]
+        return max(data)
+
+    def __get_lacl_f12(self):
+        self.__set_particular_height(self._half_mic)
+        result = self.__get_lacl_f11()
+        self.__set_default_field()
+        return result
+
     def extract(self, operand_code):
         """
         Give the operand code in it. The supported operand code are following:
@@ -179,6 +202,10 @@ class ZDDEProjectionLensDataExtractor(ProjectionLensEnvironment):
             'op-ttl': extract total length of the optical system.
             'op-dist': extract the geometric optical distortion.
             'tv-dist': extract the TV distortion.
+            'lacl-f11': extract the lateral color at 1.0 field.
+            'lacl-f12': extract teh lateral color at 1.1 field.
+            'fno': get the f number of the system.
+            'wfno': get the working f number of the system.
         """
         print(f"Extracting data: {operand_code}")
         operand_code = operand_code.lower()
@@ -204,12 +231,15 @@ class ZDDEProjectionLensDataExtractor(ProjectionLensEnvironment):
                 ],
                 "cra": [self.__get_lens_cra(self._cra_imh)],
                 "fno": self.__get_fno(),
+                "wfno": self.__get_wfno(),
                 "ri": self.__get_ri(),
                 "eflm": self.__get_eflm(),
                 "efl": self.__get_efl(),
                 "op-ttl": self.__get_op_ttl(),
                 "op-dist": self.__get_op_dist(),
                 "tv-dist": self.__get_tv_dist(),
+                "lacl-F11": self.__get_lacl_f11(),
+                "lacl-F12": self.__get_lacl_f12(),
             }
             result = data[operand_code]
         except KeyError:
@@ -220,7 +250,7 @@ class ZDDEProjectionLensDataExtractor(ProjectionLensEnvironment):
 
 def log_data(file):
     repo = find_optical_repo_path()
-    json_file = repo.joinpath("data.json")
+    json_file = repo.joinpath(CONST["DATA"] + ".json")
     data = load_json_data(json_file)
 
     with Zemax14(file) as zfile:
