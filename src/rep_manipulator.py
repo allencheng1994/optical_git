@@ -6,6 +6,7 @@ from pathlib import Path
 from . import config
 from .common import exist_optical_repo
 from .common import find_optical_repo_path
+from .common import is_number
 from .config import CONST
 
 
@@ -55,14 +56,15 @@ def repo_add_file(file):
         print(f"{file} exists.")
 
 
-def repo_add_item(file, item):
+def repo_add_item(file, items):
     rep_path = find_optical_repo_path()
     file = file.lower()
-    item = item.lower()
+    adds = [item.lower() for item in items]
     json_file = rep_path.joinpath(file + ".json")
     with open(json_file, "r", encoding="utf-8") as jfile:
         data = json.load(jfile)
-    data.setdefault(item)
+    for add_item in adds:
+        data.setdefault(add_item)
     with open(json_file, "w", encoding="utf-8") as jfile:
         json.dump(data, jfile)
 
@@ -86,7 +88,15 @@ def repo_modify(file, item, val_str):
     if item not in data:
         raise KeyError(f"{item} is not in data.")
 
-    data[item] = float(val_str) if val_str.isnumeric() else val_str
+    if len(val_str) > 1:
+        val_list = []
+        for val in val_str:
+            val_converted = float(val) if is_number(val) else val
+            val_list.append(val_converted)
+        data[item] = val_list
+    else:
+        val, *_ = val_str
+        data[item] = float(val) if is_number(val) else val
 
     with open(json_file, "w", encoding="utf-8") as jfile:
         json.dump(data, jfile)
@@ -99,14 +109,15 @@ def repo_rm_file(file):
     os.remove(json_file)
 
 
-def repo_rm_item(file, item):
+def repo_rm_item(file, items):
     rep_path = find_optical_repo_path()
     file = file.lower()
-    item = item.lower()
+    remove_items = [item.lower() for item in items]
     json_file = rep_path.joinpath(file + ".json")
     with open(json_file, "r", encoding="utf-8") as jfile:
         data = json.load(jfile)
-    data.pop(item)
+    for item in remove_items:
+        data.pop(item)
     with open(json_file, "w", encoding="utf-8") as jfile:
         json.dump(data, jfile)
 

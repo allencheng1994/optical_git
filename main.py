@@ -14,7 +14,7 @@ def go_extracting(args):
     else:
         repo = find_optical_repo_path()
         file_path = load_json_data(repo.joinpath("file.json"))["file"]
-    log_data(file_path)
+    log_data(file_path, args.refresh)
 
 
 def go_testing(args):
@@ -34,9 +34,10 @@ def repository_show(args):
 
 
 def repository_add(args):
-    if len(args.added) == 2:
+    if len(args.added) >= 2:
+        file, *added_items = args.added
         try:
-            rep_manipulator.repo_add_item(*args.added)
+            rep_manipulator.repo_add_item(file, added_items)
         except FileNotFoundError:
             print(
                 "These items should be entered correctly and be in the correct order."
@@ -44,13 +45,14 @@ def repository_add(args):
     elif len(args.added) == 1:
         rep_manipulator.repo_add_file(*args.added)
     else:
-        print("The number of arguments should be 1 or 2.")
+        print("The number of arguments should be more than 1.")
 
 
 def repository_rm(args):
-    if len(args.removed) == 2:
+    if len(args.removed) >= 2:
+        file, *removed_items = args.removed
         try:
-            rep_manipulator.repo_rm_item(*args.removed)
+            rep_manipulator.repo_rm_item(file, removed_items)
         except FileNotFoundError:
             print(
                 "These items should be entered correctly and be in the correct order."
@@ -58,12 +60,13 @@ def repository_rm(args):
     elif len(args.removed) == 1:
         rep_manipulator.repo_rm_item(*args.removed)
     else:
-        print("The number of arguments should be 1 or 2.")
+        print("The number of arguments should be more than 1.")
 
 
 def repository_modify(args):
     try:
-        rep_manipulator.repo_modify(*args.modified)
+        file, item, *val_str = args.modified
+        rep_manipulator.repo_modify(file, item, val_str)
     except FileNotFoundError:
         print("The file is not found.")
     except KeyError:
@@ -140,7 +143,7 @@ def main():
     parser_rm.set_defaults(func=repository_rm)
 
     parser_modify.add_argument(
-        "modified", type=str, nargs=3, help=f"The item which you want to modify."
+        "modified", type=str, nargs="+", help=f"The item which you want to modify."
     )
     parser_modify.set_defaults(func=repository_modify)
 
@@ -151,6 +154,9 @@ def main():
 
     parser_extract.add_argument(
         "--current", "-c", action="store_const", const=True, default=False
+    )
+    parser_extract.add_argument(
+        "--refresh", "-r", action="store_const", const=True, default=False
     )
     parser_extract.set_defaults(func=go_extracting)
     parser_testing.set_defaults(func=go_testing)

@@ -36,7 +36,7 @@ def exc_projection_lens_test():
             expected = spec_data['op-dfov']
             criterion = test_criterion['op-dfov']
             msg = f'The op-dfov {dfov} is not in the criterion {criterion}'
-            self.assertAlmostEqual(dfov, expected, messgae=msg, delta=criterion)
+            self.assertAlmostEqual(dfov, expected, msg=msg, delta=criterion)
 
         @unittest.skipIf(
             lens_data.get('ri') is None or spec_data.get('ri') is None, skip_msg
@@ -51,21 +51,36 @@ def exc_projection_lens_test():
             fcgs = lens_data['fcgs']
             expected = 0
             criterion = test_criterion['fcgs']
-            msg = f'The op-dfov {dfov} is not in the criterion {criterion}'
-            self.assertAlmostEqual(fcgs, expected, messgae=msg, delta=criterion)
+            msg = f'The fcgs {fcgs} is not in the criterion {criterion}'
+            self.assertAlmostEqual(fcgs, expected, msg=msg, delta=criterion)
 
-        @unittest.skipIf(lens_data.get('cra') is None, skip_msg)
-        def test_cra0(self):
-            cra = lens_data['cra'][0]
-            expected = spec_data['cra0']
-            criterion = test_criterion['fcgs']
-            msg = f'The op-dfov {dfov} is not in the criterion {criterion}'
-            self.assertAlmostEqual(fcgs, expected, messgae=msg, delta=criterion)
+        @unittest.skipIf(
+            lens_data.get('cra') is None or spec_data['cra'] is None, skip_msg
+        )
+        def test_cra(self):
+            cra = lens_data['cra']
+            expected_cra = spec_data['cra']
+            criterion_lower = test_criterion['cra-lower']
+            criterion_upper = test_criterion['cra-upper']
+            for lens_cra, sensor_cra in zip(cra, expected_cra):
+                with self.subTest(
+                    msg="lens cra testing", lens_cra=lens_cra, sensor_cra=sensor_cra
+                ):
+                    err_msg = (
+                        f'The cra {lens_cra} is lower than the criterion'
+                        f' {sensor_cra + criterion_lower} or larger than the criterion'
+                        f' {sensor_cra + criterion_upper}'
+                    )
+                    difference = lens_cra - sensor_cra
+                    self.assertTrue(
+                        difference <= criterion_upper or difference >= criterion_lower,
+                        msg=err_msg,
+                    )
 
     stream = StringIO()
     runner = unittest.TextTestRunner(stream=stream)
     result = runner.run(unittest.makeSuite(ProjectionLensTestCase))
-    print(f"Tess run {result.testsRun}")
+    print(f"Test run {result.testsRun}")
     print(f"Errors {result.errors}")
     pprint(result.failures)
     stream.seek(0)

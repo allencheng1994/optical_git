@@ -172,8 +172,8 @@ class ZDDEProjectionLensDataExtractor(ProjectionLensEnvironment):
                     "REAY", self.__nsur, self.__primary_wave_id, 0, 1, 0, 0
                 )
                 - self.__zfile.zOperandValue("REAY", self.__nsur, i, 0, 1, 0, 0)
-                for i in range(1, self.__nwave + 1)
             )
+            for i in range(1, self.__nwave + 1)
         ]
         return max(data)
 
@@ -182,6 +182,9 @@ class ZDDEProjectionLensDataExtractor(ProjectionLensEnvironment):
         result = self.__get_lacl_f11()
         self.__set_default_field()
         return result
+
+    def __get_fcgs(self):
+        return self.__zfile.zOperandValue("FCGS", 0, 3, 0, 0, 0, 0)
 
     def extract(self, operand_code):
         """
@@ -229,7 +232,7 @@ class ZDDEProjectionLensDataExtractor(ProjectionLensEnvironment):
                     self.__get_mtft(self._line_pair_q, i + 1)
                     for i in range(self.__nfield)
                 ],
-                "cra": [self.__get_lens_cra(self._cra_imh)],
+                "cra": self.__get_lens_cra(self._cra_imh),
                 "fno": self.__get_fno(),
                 "wfno": self.__get_wfno(),
                 "ri": self.__get_ri(),
@@ -238,8 +241,9 @@ class ZDDEProjectionLensDataExtractor(ProjectionLensEnvironment):
                 "op-ttl": self.__get_op_ttl(),
                 "op-dist": self.__get_op_dist(),
                 "tv-dist": self.__get_tv_dist(),
-                "lacl-F11": self.__get_lacl_f11(),
-                "lacl-F12": self.__get_lacl_f12(),
+                "lacl-f11": self.__get_lacl_f11(),
+                "lacl-f12": self.__get_lacl_f12(),
+                "fcgs": self.__get_fcgs(),
             }
             result = data[operand_code]
         except KeyError:
@@ -248,14 +252,21 @@ class ZDDEProjectionLensDataExtractor(ProjectionLensEnvironment):
         return result
 
 
-def log_data(file):
+def log_data(file, refresh=False):
     repo = find_optical_repo_path()
     json_file = repo.joinpath(CONST["DATA"] + ".json")
     data = load_json_data(json_file)
 
+    if refresh:
+        extract_operand_code = data.keys()
+    else:
+        extract_operand_code = [
+            operand_code for operand_code in data if data[operand_code] is None
+        ]
+
     with Zemax14(file) as zfile:
         data_extractor = ZDDEProjectionLensDataExtractor(zfile)
-        for operand_code in data:
+        for operand_code in extract_operand_code:
             data[operand_code] = data_extractor.extract(operand_code)
 
     with open(json_file, "w", encoding="utf-8") as f:

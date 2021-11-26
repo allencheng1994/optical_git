@@ -9,6 +9,14 @@ def load_json_data(json_file):
     return data
 
 
+def is_number(val_str):
+    try:
+        float(val_str)
+        return True
+    except ValueError:
+        return False
+
+
 def exist_optical_repo():
     current_path = Path.cwd()
     while current_path.parent != current_path:
