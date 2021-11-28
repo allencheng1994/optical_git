@@ -46,6 +46,14 @@ def exc_projection_lens_test():
             expected = spec_data['ri']
             self.assertGreaterEqual(ri, expected)
 
+        @unittest.skipIf(lens_data.get('wfno') is None, skip_msg)
+        def test_fcgs(self):
+            wfno = lens_data['wfno']
+            expected = spec_data['fno']
+            criterion = test_criterion['wfno']
+            wfno_percentage = abs((wfno - expected) / expected)
+            self.assertLessEqual(wfno_percentage, criterion)
+
         @unittest.skipIf(lens_data.get('fcgs') is None, skip_msg)
         def test_fcgs(self):
             fcgs = lens_data['fcgs']

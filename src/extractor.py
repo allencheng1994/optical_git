@@ -212,43 +212,41 @@ class ZDDEProjectionLensDataExtractor(ProjectionLensEnvironment):
         """
         print(f"Extracting data: {operand_code}")
         operand_code = operand_code.lower()
-        try:
-            data = {
-                "op-dfov": self.__get_fov(1),
-                "op-hfov": self.__get_fov(self._hfov_nominal),
-                "op-vfov": self.__get_fov(self._vfov_nominal),
-                "me-dfov": self.__get_fov_particular_height(1, self._imh),
-                "me-hfov": self.__get_fov_particular_height(
-                    self._hfov_nominal, self._imh
-                ),
-                "me-vfov": self.__get_fov_particular_height(
-                    self._vfov_nominal, self._imh
-                ),
-                "mtfs": [
-                    self.__get_mtfs(self._line_pair_q, i + 1)
-                    for i in range(self.__nfield)
-                ],
-                "mtft": [
-                    self.__get_mtft(self._line_pair_q, i + 1)
-                    for i in range(self.__nfield)
-                ],
-                "cra": self.__get_lens_cra(self._cra_imh),
-                "fno": self.__get_fno(),
-                "wfno": self.__get_wfno(),
-                "ri": self.__get_ri(),
-                "eflm": self.__get_eflm(),
-                "efl": self.__get_efl(),
-                "op-ttl": self.__get_op_ttl(),
-                "op-dist": self.__get_op_dist(),
-                "tv-dist": self.__get_tv_dist(),
-                "lacl-f11": self.__get_lacl_f11(),
-                "lacl-f12": self.__get_lacl_f12(),
-                "fcgs": self.__get_fcgs(),
+        data = {
+            "op-dfov": self.__get_fov(1),
+            "op-hfov": self.__get_fov(self._hfov_nominal),
+            "op-vfov": self.__get_fov(self._vfov_nominal),
+            "me-dfov": self.__get_fov_particular_height(1, self._imh),
+            "me-hfov": self.__get_fov_particular_height(
+                self._hfov_nominal, self._imh
+            ),
+            "me-vfov": self.__get_fov_particular_height(
+                self._vfov_nominal, self._imh
+            ),
+            "mtfs": [
+                self.__get_mtfs(self._line_pair_q, i + 1)
+                for i in range(self.__nfield)
+            ],
+            "mtft": [
+                self.__get_mtft(self._line_pair_q, i + 1)
+                for i in range(self.__nfield)
+            ],
+            "cra": self.__get_lens_cra(self._cra_imh),
+            "fno": self.__get_fno(),
+            "wfno": self.__get_wfno(),
+            "ri": self.__get_ri(),
+            "eflm": self.__get_eflm(),
+            "efl": self.__get_efl(),
+            "op-ttl": self.__get_op_ttl(),
+            "op-dist": self.__get_op_dist(),
+            "tv-dist": self.__get_tv_dist(),
+            "lacl-f11": self.__get_lacl_f11(),
+            "lacl-f12": self.__get_lacl_f12(),
+            "fcgs": self.__get_fcgs(),
             }
-            result = data[operand_code]
-        except KeyError:
+        result = data.get(operand_code)
+        if result is None
             print(f"The operand code, {operand_code}, is not supported.")
-            result = None
         return result
 
 
