@@ -44,15 +44,40 @@ class ProjectionLensEnvironment:
         )
         self._line_pair_q = 1000 / self._pixel_size / 4 / 2
 
-
-class ZDDEProjectionLensDataExtractor(ProjectionLensEnvironment):
+class CODEVProjectionLensDataExtractor(ProjectionLensEnvironment):
     """
-    To use this case, you need to create a link from pyzdde and return the channel.
+    To use this class, you need to create a link between python and CodeV
+    """
+        def __init__(self, channel):
+        self.__zfile = channel
+        ProjectionLensEnvironment.__init__(self)
+        self.__primary_wave_id = None
+        self.__nwave = None
+        self.__nsur = None
+
+
+class ZOSProjectionLensDataExtractor(ProjectionLensEnvironment):
+    """
+    To use this class, you need to create a link from ZOS-API and return the channel.
     Then, you need to input the channel into the argument zfile.
     """
 
-    def __init__(self, zfile):
-        self.__zfile = zfile
+    def __init__(self, channel):
+        self.__zfile = channel
+        ProjectionLensEnvironment.__init__(self)
+        self.__primary_wave_id = None
+        self.__nwave = None
+        self.__nsur = None
+
+
+class ZDDEProjectionLensDataExtractor(ProjectionLensEnvironment):
+    """
+    To use this class, you need to create a link from pyzdde and return the channel.
+    Then, you need to input the channel into the argument zfile.
+    """
+
+    def __init__(self, channel):
+        self.__zfile = channel
         ProjectionLensEnvironment.__init__(self)
         self.__system_info = self.__zfile.zGetSystem()
         self.__primary_wave_id = self.__zfile.zGetWave(0)[0]
@@ -209,6 +234,7 @@ class ZDDEProjectionLensDataExtractor(ProjectionLensEnvironment):
             'lacl-f12': extract teh lateral color at 1.1 field.
             'fno': get the f number of the system.
             'wfno': get the working f number of the system.
+            'fcgs': get the field curvature in sagital direction at center.
         """
         print(f"Extracting data: {operand_code}")
         operand_code = operand_code.lower()
@@ -217,19 +243,13 @@ class ZDDEProjectionLensDataExtractor(ProjectionLensEnvironment):
             "op-hfov": self.__get_fov(self._hfov_nominal),
             "op-vfov": self.__get_fov(self._vfov_nominal),
             "me-dfov": self.__get_fov_particular_height(1, self._imh),
-            "me-hfov": self.__get_fov_particular_height(
-                self._hfov_nominal, self._imh
-            ),
-            "me-vfov": self.__get_fov_particular_height(
-                self._vfov_nominal, self._imh
-            ),
+            "me-hfov": self.__get_fov_particular_height(self._hfov_nominal, self._imh),
+            "me-vfov": self.__get_fov_particular_height(self._vfov_nominal, self._imh),
             "mtfs": [
-                self.__get_mtfs(self._line_pair_q, i + 1)
-                for i in range(self.__nfield)
+                self.__get_mtfs(self._line_pair_q, i + 1) for i in range(self.__nfield)
             ],
             "mtft": [
-                self.__get_mtft(self._line_pair_q, i + 1)
-                for i in range(self.__nfield)
+                self.__get_mtft(self._line_pair_q, i + 1) for i in range(self.__nfield)
             ],
             "cra": self.__get_lens_cra(self._cra_imh),
             "fno": self.__get_fno(),
@@ -243,14 +263,16 @@ class ZDDEProjectionLensDataExtractor(ProjectionLensEnvironment):
             "lacl-f11": self.__get_lacl_f11(),
             "lacl-f12": self.__get_lacl_f12(),
             "fcgs": self.__get_fcgs(),
-            }
+        }
         result = data.get(operand_code)
-        if result is None
-            print(f"The operand code, {operand_code}, is not supported.")
+        if result is None:
+            print(
+                f"The operand code, {operand_code}, is not supported by ZDDEProjectionLensDataExtractor."
+            )
         return result
 
 
-def log_data(file, refresh=False):
+def log_data(file, refresh=False, engine='pyzdde'):
     repo = find_optical_repo_path()
     json_file = repo.joinpath(CONST["DATA"] + ".json")
     data = load_json_data(json_file)
@@ -262,10 +284,14 @@ def log_data(file, refresh=False):
             operand_code for operand_code in data if data[operand_code] is None
         ]
 
-    with Zemax14(file) as zfile:
-        data_extractor = ZDDEProjectionLensDataExtractor(zfile)
-        for operand_code in extract_operand_code:
-            data[operand_code] = data_extractor.extract(operand_code)
+    if engine == 'pyzdde':
+        with Zemax14(file) as zfile:
+            data_extractor = ZDDEProjectionLensDataExtractor(zfile)
+            for operand_code in extract_operand_code:
+                data[operand_code] = data_extractor.extract(operand_code)
+    elif engine == 'zos-api':
+        pass
+        
 
     with open(json_file, "w", encoding="utf-8") as f:
         json.dump(data, f)
