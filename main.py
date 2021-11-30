@@ -46,7 +46,7 @@ def type_formating(args):
         with open(file_path, "w", encoding="utf-8") as outfile:
             for obj in objs:
                 json.dump(obj, outfile, indent=4)
-                outfile.write('\n')
+                outfile.write("\n")
 
 
 def repository_initialize(args):
@@ -59,6 +59,13 @@ def repository_show(args):
         rep_manipulator.repo_show_files()
     else:
         rep_manipulator.repo_show_items(args.item)
+
+
+def repository_show_fig(args):
+    if args.figure == "":
+        rep_manipulator.repo_show_figs()
+    else:
+        rep_manipulator.repo_show_fig(args.figure)
 
 
 def repository_add(args):
@@ -142,6 +149,17 @@ def main():
         help="The item which you want to get the information.",
     )
     parser_show.set_defaults(func=repository_show)
+
+    # Show the figure
+    parser_show_figs = subparsers.add_parser("show-fig", help="show the figure")
+    parser_show_figs.add_argument(
+        "figure",
+        type=str,
+        nargs="?",
+        default="",
+        help="The figure which you want to show.",
+    )
+    parser_show_figs.set_defaults(func=repository_show_fig)
 
     # Add items
     parser_add = subparsers.add_parser("add", help=f"Add the item to the file.")

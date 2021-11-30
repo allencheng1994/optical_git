@@ -4,6 +4,7 @@ from ZOS_DDE.zemax_pyzdde import Zemax14
 from .common import load_json_data
 from .common import find_optical_repo_path
 from .config import CONST
+from .config import CONFIG_FOLDER
 
 
 class ProjectionLensEnvironment:
@@ -133,6 +134,15 @@ class ZDDEProjectionLensDataExtractor(ProjectionLensEnvironment):
             * 2
         )
 
+    def _get_op_dfov(self):
+        return self._get_fov(1)
+
+    def _get_op_hfov(self):
+        return self._get_fov(self._hfov_nominal)
+
+    def _get_op_vfov(self):
+        return self._get_fov(self._vfov_nominal)
+
     def _get_fov_particular_height(self, nominal, height):
         self.__set_particular_height(height)
         result = (
@@ -144,11 +154,29 @@ class ZDDEProjectionLensDataExtractor(ProjectionLensEnvironment):
         self.__set_default_field()
         return result
 
+    def _get_me_dfov(self):
+        return self._get_fov_particular_height(1, self._half_mic)
+
+    def _get_me_hfov(self):
+        return self._get_fov_particular_height(self._hfov_nominal, self._half_mic)
+
+    def _get_me_vfov(self):
+        return self._get_fov_particular_height(self._vfov_nominal, self._half_mic)
+
     def _get_mtfs(self, line_pair, field):
         return self.__zfile.zOperandValue("MTFS", 2, 0, field, line_pair, 0, 0)
 
-    def _get_mtft(self, line_pair, field):
-        return self.__zfile.zOperandValue("MTFT", 2, 0, field, line_pair, 0, 0)
+    def _get_mtfs_whole_default(self):
+        return [self._get_mtfs(self._line_pair_q, i + 1) for i in range(self.__nfield)]
+
+    def _get_mtfs_center_default(self):
+        return self._get_mtfs(self._line_pair_q, 1)
+
+    def _get_mtfs_middle_default(self):
+        return self._get_mtfs(self._line_pair_q, 4)
+
+    def _get_mtfs_outer_default(self):
+        return self._get_mtfs(self._line_pair_q, 9)
 
     def _get_mtfs_particular_height(self, line_pair, height):
         self.__set_particular_height(height)
@@ -156,11 +184,32 @@ class ZDDEProjectionLensDataExtractor(ProjectionLensEnvironment):
         self.__set_default_field()
         return result
 
+    def _get_mtfs_mic_default(self):
+        return self._get_mtfs_particular_height(self._line_pair_q, self._half_mic)
+
+    def _get_mtft(self, line_pair, field):
+        return self.__zfile.zOperandValue("MTFT", 2, 0, field, line_pair, 0, 0)
+
+    def _get_mtft_whole_default(self):
+        return [self._get_mtft(self._line_pair_q, i + 1) for i in range(self.__nfield)]
+
+    def _get_mtft_center_default(self):
+        return self._get_mtft(self._line_pair_q, 1)
+
+    def _get_mtft_middle_default(self):
+        return self._get_mtft(self._line_pair_q, 4)
+
+    def _get_mtft_outer_default(self):
+        return self._get_mtft(self._line_pair_q, 9)
+
     def _get_mtft_particular_height(self, line_pair, height):
         self.__set_particular_height(height)
         result = self.__zfile.zOperandValue("MTFT", 2, 0, 12, line_pair, 0, 0)
         self.__set_default_field()
         return result
+
+    def _get_mtft_mic_default(self):
+        return self._get_mtft_particular_height(self._line_pair_q, self._half_mic)
 
     def _get_lens_cra(self, sensor_imh, num=10):
         for i in range(num + 1):
@@ -177,6 +226,9 @@ class ZDDEProjectionLensDataExtractor(ProjectionLensEnvironment):
 
         self.__set_default_field()
         return cra
+
+    def _get_lens_cra_default(self):
+        return self._get_lens_cra(self._cra_imh)
 
     def _get_fno(self):
         return self.__zfile.zGetSystemAper()[2]
@@ -296,50 +348,38 @@ class ZDDEProjectionLensDataExtractor(ProjectionLensEnvironment):
         print(f"Extracting data: {operand_code}")
         operand_code = operand_code.lower()
         data = {
-            "op-dfov": self._get_fov(1),
-            "op-hfov": self._get_fov(self._hfov_nominal),
-            "op-vfov": self._get_fov(self._vfov_nominal),
-            "me-dfov": self._get_fov_particular_height(1, self._half_mic),
-            "me-hfov": self._get_fov_particular_height(
-                self._hfov_nominal, self._half_mic
-            ),
-            "me-vfov": self._get_fov_particular_height(
-                self._vfov_nominal, self._half_mic
-            ),
-            "mtfs": [
-                self._get_mtfs(self._line_pair_q, i + 1) for i in range(self.__nfield)
-            ],
-            "mtft": [
-                self._get_mtft(self._line_pair_q, i + 1) for i in range(self.__nfield)
-            ],
-            "mtfs-center": self._get_mtfs(self._line_pair_q, 1),
-            "mtfs-middle": self._get_mtfs(self._line_pair_q, 4),
-            "mtfs-outer": self._get_mtfs(self._line_pair_q, 9),
-            "mtfs-mic": self._get_mtfs_particular_height(
-                self._line_pair_q, self._half_mic
-            ),
-            "mtft-center": self._get_mtft(self._line_pair_q, 1),
-            "mtft-middle": self._get_mtft(self._line_pair_q, 4),
-            "mtft-outer": self._get_mtft(self._line_pair_q, 9),
-            "mtft-mic": self._get_mtft_particular_height(
-                self._line_pair_q, self._half_mic
-            ),
-            "cra": self._get_lens_cra(self._cra_imh),
-            "fno": self._get_fno(),
-            "wfno": self._get_wfno(),
-            "ri": self._get_ri(),
-            "eflm": self._get_eflm(),
-            "efl": self._get_efl(),
-            "op-ttl": self._get_op_ttl(),
-            "op-dist": self._get_op_dist(),
-            "tv-dist": self._get_tv_dist(),
-            "lacl-f11": self._get_lacl_f11(),
-            "lacl-f12": self._get_lacl_f12(),
-            "fcgs": self._get_fcgs(),
-            "aper-pos": self._get_stop_p1_edge(),
-            "tir": self._get_reflected_angle(),
+            "op-dfov": self._get_op_dfov,
+            "op-hfov": self._get_op_hfov,
+            "op-vfov": self._get_op_vfov,
+            "me-dfov": self._get_me_dfov,
+            "me-hfov": self._get_me_hfov,
+            "me-vfov": self._get_me_vfov,
+            "mtfs": self._get_mtfs_whole_default,
+            "mtft": self._get_mtft_whole_default,
+            "mtfs-center": self._get_mtfs_center_default,
+            "mtfs-middle": self._get_mtfs_middle_default,
+            "mtfs-outer": self._get_mtfs_outer_default,
+            "mtfs-mic": self._get_mtfs_mic_default,
+            "mtft-center": self._get_mtft_center_default,
+            "mtft-middle": self._get_mtft_middle_default,
+            "mtft-outer": self._get_mtft_outer_default,
+            "mtft-mic": self._get_mtft_mic_default,
+            "cra": self._get_lens_cra_default,
+            "fno": self._get_fno,
+            "wfno": self._get_wfno,
+            "ri": self._get_ri,
+            "eflm": self._get_eflm,
+            "efl": self._get_efl,
+            "op-ttl": self._get_op_ttl,
+            "op-dist": self._get_op_dist,
+            "tv-dist": self._get_tv_dist,
+            "lacl-f11": self._get_lacl_f11,
+            "lacl-f12": self._get_lacl_f12,
+            "fcgs": self._get_fcgs,
+            "aper-pos": self._get_stop_p1_edge,
+            "tir": self._get_reflected_angle,
         }
-        result = data.get(operand_code)
+        result = data.get(operand_code)()
         if result is None:
             print(
                 f"The operand code, {operand_code}, is not supported by"
@@ -348,18 +388,90 @@ class ZDDEProjectionLensDataExtractor(ProjectionLensEnvironment):
         return result
 
     def _export_figure_ri(self, save_path):
-        self.__zfile.zGetMetaFile(save_path.joinpath('tmp_REL.wmf'), 'Rel')
+        self.__zfile.zGetMetaFile(save_path.joinpath("rel.wmf"), "Rel")
+
+    def _export_figure_mtfvslp(self, save_path, line_pair):
+        self.__zfile.zSetField(0, 3, 4, 0)
+        self.__zfile.zSetField(1, 0, 0, 1)
+        self.__zfile.zSetField(2, 0, 0.6 * self._imh, 1)
+        self.__zfile.zSetField(3, 0, 0.8 * self._imh, 1)
+        self.__zfile.zSetField(4, 0, self._imh, 1)
+        self.__zfile.zModifySettings(
+            save_path.joinpath("tmp.CFG"), "MTF_MAXF", line_pair
+        )
+        self.__zfile.zGetMetaFile(
+            save_path.joinpath("mtf.wmf"), "Mtf", save_path.joinpath("tmp.CFG"), 1
+        )
+        self.__set_default_field()
+
+    def _export_figure_mtfvslp_default(self, save_path):
+        self._export_figure_mtfvslp(save_path, self._line_pair_q * 4)
+
+    def _export_figure_tfm(self, save_path, line_pair):
+        self.__zfile.zSetField(0, 3, 4, 0)
+        self.__zfile.zSetField(1, 0, 0, 1)
+        self.__zfile.zSetField(2, 0, 0.6 * self._imh, 1)
+        self.__zfile.zSetField(3, 0, 0.8 * self._imh, 1)
+        self.__zfile.zSetField(4, 0, self._imh, 1)
+        self.__zfile.zModifySettings(
+            save_path.joinpath("tmp.CFG"), "TFM_FREQ", line_pair
+        )
+        self.__zfile.zGetMetaFile(
+            save_path.joinpath("tfm.wmf"), "Tfm", save_path.joinpath("tmp.CFG"), 1
+        )
+        self.__set_default_field()
+
+    def _export_figure_tfm_default(self, save_path):
+        self._export_figure_tfm(save_path, self._line_pair_q)
+
+    def _export_figure_spt(self, save_path):
+        self.__zfile.zGetMetaFile(save_path.joinpath("spt.wmf"), "Spt")
+
+    def _export_figure_distortion_tan(self, save_path):
+        self.__zfile.zGetMetaFile(
+            save_path.joinpath("fcd_tan.wmf"),
+            "Fcd",
+            CONFIG_FOLDER.joinpath("distortion_tan.CFG"),
+            1,
+        )
+
+    def _export_figure_distortion_ftheta(self, save_path):
+        self.__zfile.zGetMetaFile(
+            save_path.joinpath("fcd_ftheta.wmf"),
+            "Fcd",
+            CONFIG_FOLDER.joinpath("distortion_ftheta.CFG"),
+            1,
+        )
 
     def export_fig(self, fig_code):
+        """Give the operand code in it and get the figure. The supported operand code are following:
+
+        rel: Relative illumination
+        mtf: mtf vs line pair
+        tfm: through focus mtf
+        fcd-tan: field curvature and distortion calculated by using tangent theta
+        fcd-ftheta: field curvature and distortion calculated by using f theta
+
+        """
         repo = find_optical_repo_path()
         fig_code = fig_code.lower()
-        figs = {"rel": self._export_figure_ri(repo)}
-        figs.get(fig_code)
+        figs = {
+            "rel": self._export_figure_ri,
+            "mtf": self._export_figure_mtfvslp_default,
+            "tfm": self._export_figure_tfm_default,
+            "spt": self._export_figure_spt,
+            "fcd-tan": self._export_figure_distortion_tan,
+            "fcd-ftheta": self._export_figure_distortion_ftheta,
+        }
+
         if fig_code not in figs:
             print(
                 f"The operand code, {fig_code}, is not supported by"
                 " ZDDEProjectionLensDataExtractor."
             )
+        else:
+            print(fig_code)
+            figs.get(fig_code)(repo)
 
 
 def log_data(file, refresh=False, engine="pyzdde"):
@@ -399,7 +511,6 @@ def export_figs(file, engine="pyzdde"):
         with Zemax14(file) as zfile:
             data_extractor = ZDDEProjectionLensDataExtractor(zfile)
             for fig_code in export_operand_code:
-                print(fig_code)
                 data_extractor.export_fig(fig_code)
     elif engine == "zos-api":
         pass

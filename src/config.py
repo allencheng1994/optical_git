@@ -4,6 +4,7 @@ from pathlib import PurePath
 # Installed file
 INSTALLED_FOLDER = PurePath("D:/Code/Python_Code/optical_git")
 USR_CONFIG = INSTALLED_FOLDER.joinpath("usr_config.json")
+CONFIG_FOLDER = INSTALLED_FOLDER.joinpath("config/")
 
 # The constant variable in system
 CONST = {
@@ -72,8 +73,9 @@ LOGGER_TEMPLATE = {
                 "rel": False,
                 "tfm": False,
                 "mtf": False,
-                "fcd_tan": False,
-                "fcg_theta": False,
+                "fcd-tan": False,
+                "fcg-ftheta": False,
+                "spt": False,
             },
             CONST["SPEC-TARGET"]: {
                 "op-dfov": None,
