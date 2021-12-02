@@ -1,7 +1,20 @@
 import json
 import sys
+import re
 from pathlib import Path
 from .config import CONST
+from wand.image import Image
+
+
+def convert_wmf(img, filetype="png"):
+    filepath = img.resolve()
+    parent = filepath.parent
+    newfilename = re.sub(".wmf", "", filepath.name)
+    newfilepath = parent.joinpath(newfilename + "." + filetype).resolve()
+    with Image(filename=filepath) as image_file:
+        image_file.format = filetype
+        image_file.save(filename=newfilepath)
+    img.unlink(missing_ok=True)
 
 
 def load_json_data(json_file):
@@ -37,8 +50,8 @@ def find_optical_repo_path():
         current_path = current_path.parent
     if current_path.joinpath(CONST["OPTICAL-GIT"]).exists():
         return current_path.joinpath(CONST["OPTICAL-GIT"])
-    # raise FileNotFoundError
-    sys.exit(f"Cannot find {CONST["OPTICAL-GIT"]}")
+    raise FileNotFoundError
+    # sys.exit(f"Cannot find {CONST["OPTICAL-GIT"]}")
 
 
 if __name__ == "__main__":

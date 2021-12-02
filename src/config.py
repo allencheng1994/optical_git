@@ -75,7 +75,7 @@ LOGGER_TEMPLATE = {
                 "tfm": False,
                 "mtf": False,
                 "fcd-tan": False,
-                "fcg-ftheta": False,
+                "fcd-ftheta": False,
                 "spt": False,
             },
             CONST["SPEC-TARGET"]: {

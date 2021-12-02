@@ -3,6 +3,7 @@ import math
 from ZOS_DDE.zemax_pyzdde import Zemax14
 from .common import load_json_data
 from .common import find_optical_repo_path
+from .common import convert_wmf
 from .config import CONST
 from .config import CONFIG_FOLDER
 
@@ -389,6 +390,7 @@ class ZDDEProjectionLensDataExtractor(ProjectionLensEnvironment):
 
     def _export_figure_ri(self, save_path):
         self.__zfile.zGetMetaFile(save_path.joinpath("rel.wmf"), "Rel")
+        convert_wmf(save_path.joinpath("rel.wmf"))
 
     def _export_figure_mtfvslp(self, save_path, line_pair):
         self.__zfile.zSetField(0, 3, 4, 0)
@@ -403,6 +405,7 @@ class ZDDEProjectionLensDataExtractor(ProjectionLensEnvironment):
             save_path.joinpath("mtf.wmf"), "Mtf", save_path.joinpath("tmp.CFG"), 1
         )
         self.__set_default_field()
+        convert_wmf(save_path.joinpath("mtf.wmf"))
 
     def _export_figure_mtfvslp_default(self, save_path):
         self._export_figure_mtfvslp(save_path, self._line_pair_q * 4)
@@ -420,12 +423,14 @@ class ZDDEProjectionLensDataExtractor(ProjectionLensEnvironment):
             save_path.joinpath("tfm.wmf"), "Tfm", save_path.joinpath("tmp.CFG"), 1
         )
         self.__set_default_field()
+        convert_wmf(save_path.joinpath("tfm.wmf"))
 
     def _export_figure_tfm_default(self, save_path):
         self._export_figure_tfm(save_path, self._line_pair_q)
 
     def _export_figure_spt(self, save_path):
         self.__zfile.zGetMetaFile(save_path.joinpath("spt.wmf"), "Spt")
+        convert_wmf(save_path.joinpath("spt.wmf"))
 
     def _export_figure_distortion_tan(self, save_path):
         self.__zfile.zGetMetaFile(
@@ -434,6 +439,7 @@ class ZDDEProjectionLensDataExtractor(ProjectionLensEnvironment):
             CONFIG_FOLDER.joinpath("distortion_tan.CFG"),
             1,
         )
+        convert_wmf(save_path.joinpath("fcd_tan.wmf"))
 
     def _export_figure_distortion_ftheta(self, save_path):
         self.__zfile.zGetMetaFile(
@@ -442,6 +448,7 @@ class ZDDEProjectionLensDataExtractor(ProjectionLensEnvironment):
             CONFIG_FOLDER.joinpath("distortion_ftheta.CFG"),
             1,
         )
+        convert_wmf(save_path.joinpath("fcd_ftheta.wmf"))
 
     def export_fig(self, fig_code):
         """

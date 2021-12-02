@@ -2,16 +2,13 @@ import json
 import sys
 import re
 import os
-from git import Repo
 from pathlib import Path
-import matplotlib.pyplot as plt
+from git import Repo
 from PIL import Image
 from . import config
 from .common import exist_optical_repo
 from .common import find_optical_repo_path
 from .common import is_number
-from .config import CONST
-import subprocess
 
 
 def repo_init(template):
@@ -19,7 +16,7 @@ def repo_init(template):
         sys.exit("Repository already exists.")
 
     Repo.init(Path.cwd())
-    repo_path = Path.cwd().joinpath(".optical_git")
+    repo_path = Path.cwd().joinpath(config.CONST["OPTICAL-GIT"])
     Path.mkdir(repo_path)
     for key_name in template:
         json_file = repo_path.joinpath(key_name + ".json")
@@ -47,20 +44,17 @@ def repo_show_items(file_name):
 
 def repo_show_figs():
     repo_path = find_optical_repo_path()
-    figs = list(repo_path.glob(r"*.wmf"))
+    figs = list(repo_path.glob(r"*.png"))
     for fig in figs:
-        name = re.sub(".wmf", "", fig.name)
+        name = re.sub(".png", "", fig.name)
         print(name)
 
 
 def repo_show_fig(fig_name):
     repo_path = find_optical_repo_path()
-    fig_file = str(repo_path.joinpath(fig_name + ".wmf"))
-    paintPath = (
-        os.path.splitdrive(os.path.expanduser("~"))[0]
-        + r"\WINDOWS\system32\mspaint.exe"
-    )
-    subprocess.Popen("%s %s" % (paintPath, fig_file))
+    fig_file = repo_path.joinpath(fig_name + ".png")
+    im = Image.open(fig_file.resolve())
+    im.show()
 
 
 def repo_add_file(file):
@@ -98,10 +92,7 @@ def repo_modify(file, item, val_str):
         exit_msg = f"The value in {file} should not be changed by using modify."
         sys.exit(exit_msg)
     if item == "file":
-        exit_msg = (
-            f"If you want to change the tracking file, you should use 'file' to"
-            f" modify it."
-        )
+        exit_msg = "If you want to change the tracking file, you should use 'file' to modify it."
         sys.exit(exit_msg)
     item = item.lower()
     json_file = repo_path.joinpath(file + ".json")
@@ -146,8 +137,8 @@ def repo_rm_item(file, items):
 
 def repo_collect():
     repo_path = find_optical_repo_path()
-    log_file = repo_path.joinpath(CONST["LOG"] + ".json")
-    criterion_file = repo_path.joinpath(CONST["CRITERION"] + ".json")
+    log_file = repo_path.joinpath(config.CONST["LOG"] + ".json")
+    criterion_file = repo_path.joinpath(config.CONST["CRITERION"] + ".json")
     json_files = list(repo_path.glob(r"*.json"))
     whole_data = {}
     for file in json_files:
