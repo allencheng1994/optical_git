@@ -320,28 +320,28 @@ class ZDDEProjectionLensDataExtractor(ProjectionLensEnvironment):
             'mtfs': extract the mtf in sagital direction.
             'mtft': extract the mtf in tangential direction.
                 center 0F, middle 0.3F, outer 0.8F, mic 1.1F
-\
+
             'cra': extract the chief ray angle.
             'wfno': get the working f number of the system.
             'fno': get the f number of the system.
-            
+
             'ri': get the relative illumination on 1.0F
 
             'elfm': extract the effective focal length using magnification method to calculate.
             'efl': extraact the effective focal length which calculated by the operand, EFFL, in Zemax.
-            
+
             'op-ttl': extract total length of the optical system.
-            
+
             'op-dist': extract the geometric optical distortion.
             'tv-dist': extract the TV distortion.
-            
+
             'lacl-f11': extract the lateral color at 1.0 field.
             'lacl-f12': extract teh lateral color at 1.1 field.
-            
+
             'fcgs': get the field curvature in sagital direction at center.
 
             'aper-pos': get the distance between the edge of the stop and the first lens in your system.
-            
+
             'tir': extract the reflected angle of the last lens in the system.
 
         """
@@ -444,7 +444,8 @@ class ZDDEProjectionLensDataExtractor(ProjectionLensEnvironment):
         )
 
     def export_fig(self, fig_code):
-        """Give the operand code in it and get the figure. The supported operand code are following:
+        """
+        Give the operand code in it and get the figure. The supported operand code are following:
 
         rel: Relative illumination
         mtf: mtf vs line pair

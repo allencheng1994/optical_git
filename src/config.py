@@ -8,6 +8,7 @@ CONFIG_FOLDER = INSTALLED_FOLDER.joinpath("config/")
 
 # The constant variable in system
 CONST = {
+    "OPTICAL-GIT": ".optical-git",
     "TRACKFILE": "file",
     "CHANGE-NOTE": "change-note",
     "ENVIRONMENT": "environment",

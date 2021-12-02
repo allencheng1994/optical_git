@@ -11,6 +11,7 @@ from .common import exist_optical_repo
 from .common import find_optical_repo_path
 from .common import is_number
 from .config import CONST
+import subprocess
 
 
 def repo_init(template):
@@ -53,7 +54,13 @@ def repo_show_figs():
 
 
 def repo_show_fig(fig_name):
-    pass
+    repo_path = find_optical_repo_path()
+    fig_file = str(repo_path.joinpath(fig_name + ".wmf"))
+    paintPath = (
+        os.path.splitdrive(os.path.expanduser("~"))[0]
+        + r"\WINDOWS\system32\mspaint.exe"
+    )
+    subprocess.Popen("%s %s" % (paintPath, fig_file))
 
 
 def repo_add_file(file):
