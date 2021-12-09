@@ -5,6 +5,7 @@ from pathlib import PurePath
 INSTALLED_FOLDER = PurePath("D:/Code/Python_Code/optical_git")
 USR_CONFIG = INSTALLED_FOLDER.joinpath("usr_config.json")
 CONFIG_FOLDER = INSTALLED_FOLDER.joinpath("config/")
+TEMP_FOLDER = INSTALLED_FOLDER.joinpath("temp/")
 
 # The constant variable in system
 CONST = {

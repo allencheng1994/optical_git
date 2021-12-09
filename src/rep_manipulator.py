@@ -2,6 +2,7 @@ import json
 import sys
 import re
 import os
+import subprocess
 from pathlib import Path
 from git import Repo
 from PIL import Image
@@ -177,5 +178,15 @@ def repo_change_tracking_file(file):
         json.dump(data, jfile)
 
 
+def __repo_copy_file(SHA, filename, file_id=0):
+    opt_repo = find_optical_repo_path()
+    file = opt_repo.glob(filename + "*")
+    SHA_file = SHA + ":./" + opt_repo.name + "/" + file.name
+    new_file = open(TEMP_FOLDER.joinpath(file.name + file_id), "w+")
+    cmd = subprocess.call("git show " + SHA_file, cwd=opt_repo, stdout=new_file)
+    new_file.close()
+
+
 if __name__ == "__main__":
-    pass
+    opt_repo = find_optical_repo_path()
+    file = opt_repo.glob()

@@ -50,7 +50,7 @@ def find_optical_repo_path():
         current_path = current_path.parent
     if current_path.joinpath(CONST["OPTICAL-GIT"]).exists():
         return current_path.joinpath(CONST["OPTICAL-GIT"])
-    raise FileNotFoundError
+    raise FileNotFoundError(f"Cannot find {CONST["OPTICAL-GIT"]}")
     # sys.exit(f"Cannot find {CONST["OPTICAL-GIT"]}")
 
 
