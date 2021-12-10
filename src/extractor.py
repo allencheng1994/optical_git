@@ -452,7 +452,7 @@ class ZDDEProjectionLensDataExtractor(ProjectionLensEnvironment):
 
     def export_fig(self, fig_code):
         """
-        Give the operand code in it and get the figure. The supported operand code are following:
+        Fill the operand code in it and get the figure. The supported operand code are following:
 
         rel: Relative illumination
         mtf: mtf vs line pair

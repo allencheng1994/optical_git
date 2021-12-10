@@ -178,15 +178,26 @@ def repo_change_tracking_file(file):
         json.dump(data, jfile)
 
 
-def __repo_copy_file(SHA, filename, file_id=0):
+def repo_pick_files(fig_name, SHA_list, suffix):
     opt_repo = find_optical_repo_path()
-    file = opt_repo.glob(filename + "*")
-    SHA_file = SHA + ":./" + opt_repo.name + "/" + file.name
-    new_file = open(TEMP_FOLDER.joinpath(file.name + file_id), "w+")
-    cmd = subprocess.call("git show " + SHA_file, cwd=opt_repo, stdout=new_file)
-    new_file.close()
+    for sha in SHA_list:
+        SHA_file = sha + ":./" + fig_name + suffix
+        newname = fig_name + "-" + sha + suffix
+        new_file = open(config.TEMP_FOLDER.joinpath(newname), "w+")
+        cmd = subprocess.call("git show " + SHA_file, cwd=opt_repo, stdout=new_file)
+        new_file.close()
+        if cmd:
+            os.remove(config.TEMP_FOLDER.joinpath(newname))
+            print(f"You didn't export the data when you commit at {sha}.")
+
+
+def repo_pick_design(file, SHA_list):
+    pass
+
+
+def repo_commit():
+    pass
 
 
 if __name__ == "__main__":
-    opt_repo = find_optical_repo_path()
-    file = opt_repo.glob()
+    pass

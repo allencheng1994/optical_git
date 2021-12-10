@@ -33,11 +33,11 @@ def go_testing(args):
 
 
 def type_formating(args):
+    repo = find_optical_repo_path()
     if args.all:
-        repo = find_optical_repo_path()
         files = list(repo.glob(r"*.json"))
     else:
-        files = args.file
+        files = [repo.joinpath(file + ".json") for file in args.file]
     for file in files:
         file_path = Path(os.path.abspath(file))
         with open(file_path, "r", encoding="utf-8") as infile:
@@ -110,6 +110,14 @@ def repository_modify(args):
 
 def repository_collect(args):
     rep_manipulator.repo_collect()
+
+
+def repository_pick_data(args):
+    rep_manipulator.repo_pick_files(args.file, args.sha, suffix=".json")
+
+
+def repository_pick_figs(args):
+    rep_manipulator.repo_pick_files(args.file, args.sha, suffix=".png")
 
 
 def change_tracking_file(args):
@@ -263,14 +271,45 @@ def main():
     )
     parser_type_format.add_argument(
         "file",
-        nargs="?",
+        nargs="+",
         type=str,
         help="The json file which you want to do formating.",
+        default="",
     )
     parser_type_format.add_argument(
         "--all", "-a", action="store_const", const=True, default=False
     )
     parser_type_format.set_defaults(func=type_formating)
+
+    parser_pick_data = subparsers.add_parser(
+        "pick-data",
+        aliases=["pd"],
+        help="copy the specific file from the specific version.",
+    )
+
+    parser_pick_data.add_argument("file", type=str, help="target")
+    parser_pick_data.add_argument(
+        "sha",
+        nargs="+",
+        type=str,
+        help="The SHA or tag's value of the specific version. However, using tags is much better.",
+    )
+    parser_pick_data.set_defaults(func=repository_pick_data)
+
+    parser_pick_figs = subparsers.add_parser(
+        "pick-fig",
+        aliases=["pf"],
+        help="copy the specific file from the specific version.",
+    )
+
+    parser_pick_figs.add_argument("file", type=str, help="target")
+    parser_pick_figs.add_argument(
+        "sha",
+        nargs="+",
+        type=str,
+        help="The SHA or tag's value of the specific version. However, using tags is much better.",
+    )
+    parser_pick_figs.set_defaults(func=repository_pick_figs)
 
     args = parser.parse_args()
     args.func(args)
