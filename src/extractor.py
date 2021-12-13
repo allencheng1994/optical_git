@@ -99,7 +99,7 @@ class ZDDEProjectionLensDataExtractor(ProjectionLensEnvironment):
 
         self.__set_default_field()
 
-    def __rm_coordinate_break(self):
+    def __rm_coordinate_break(self) -> None:
         coord_id = []
         for surf_num in range(1, self.__nsur + 1):
             surf_type = self.__zfile.zGetSurfaceData(surf_num, 0)
@@ -112,14 +112,14 @@ class ZDDEProjectionLensDataExtractor(ProjectionLensEnvironment):
         self.__system_info = self.__zfile.zGetSystem()
         self.__nsur = self.__system_info[0]
 
-    def __set_default_field(self):
+    def __set_default_field(self) -> None:
         self.__zfile.zSetField(0, 3, self.__nfield, 0)
         for i in range(self.__nfield):
             self.__zfile.zSetField(i + 1, 0, self._imh * i * 0.1, 1)
         self.__zfile.zSetVig()
         self.__zfile.zGetUpdate()
 
-    def __set_particular_height(self, height):
+    def __set_particular_height(self, height) -> None:
         self.__zfile.zSetField(0, 3, self.__nfield + 1, 0)
         for i in range(self.__nfield):
             self.__zfile.zSetField(i + 1, 0, self._imh * i * 0.1, 1)
@@ -127,7 +127,7 @@ class ZDDEProjectionLensDataExtractor(ProjectionLensEnvironment):
         self.__zfile.zSetVig()
         self.__zfile.zGetUpdate()
 
-    def _get_fov(self, nominal):
+    def _get_fov(self, nominal) -> float:
         return (
             self.__zfile.zOperandValue(
                 "RAID", 1, self.__primary_wave_id, 0, nominal, 0, 0
@@ -135,16 +135,16 @@ class ZDDEProjectionLensDataExtractor(ProjectionLensEnvironment):
             * 2
         )
 
-    def _get_op_dfov(self):
+    def _get_op_dfov(self) -> float:
         return self._get_fov(1)
 
-    def _get_op_hfov(self):
+    def _get_op_hfov(self) -> float:
         return self._get_fov(self._hfov_nominal)
 
-    def _get_op_vfov(self):
+    def _get_op_vfov(self) -> float:
         return self._get_fov(self._vfov_nominal)
 
-    def _get_fov_particular_height(self, nominal, height):
+    def _get_fov_particular_height(self, nominal: float, height: float) -> float:
         self.__set_particular_height(height)
         result = (
             self.__zfile.zOperandValue(
@@ -155,31 +155,31 @@ class ZDDEProjectionLensDataExtractor(ProjectionLensEnvironment):
         self.__set_default_field()
         return result
 
-    def _get_me_dfov(self):
+    def _get_me_dfov(self) -> float:
         return self._get_fov_particular_height(1, self._half_mic)
 
-    def _get_me_hfov(self):
+    def _get_me_hfov(self) -> float:
         return self._get_fov_particular_height(self._hfov_nominal, self._half_mic)
 
-    def _get_me_vfov(self):
+    def _get_me_vfov(self) -> float:
         return self._get_fov_particular_height(self._vfov_nominal, self._half_mic)
 
-    def _get_mtfs(self, line_pair, field):
+    def _get_mtfs(self, line_pair: float, field: int) -> float:
         return self.__zfile.zOperandValue("MTFS", 2, 0, field, line_pair, 0, 0)
 
-    def _get_mtfs_whole_default(self):
+    def _get_mtfs_whole_default(self) -> list:
         return [self._get_mtfs(self._line_pair_q, i + 1) for i in range(self.__nfield)]
 
-    def _get_mtfs_center_default(self):
+    def _get_mtfs_center_default(self) -> float:
         return self._get_mtfs(self._line_pair_q, 1)
 
-    def _get_mtfs_middle_default(self):
+    def _get_mtfs_middle_default(self) -> float:
         return self._get_mtfs(self._line_pair_q, 4)
 
-    def _get_mtfs_outer_default(self):
+    def _get_mtfs_outer_default(self) -> float:
         return self._get_mtfs(self._line_pair_q, 9)
 
-    def _get_mtfs_particular_height(self, line_pair, height):
+    def _get_mtfs_particular_height(self, line_pair: float, height: float) -> float:
         self.__set_particular_height(height)
         result = self.__zfile.zOperandValue("MTFS", 2, 0, 12, line_pair, 0, 0)
         self.__set_default_field()

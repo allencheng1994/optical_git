@@ -271,10 +271,9 @@ def main():
     )
     parser_type_format.add_argument(
         "file",
-        nargs="+",
+        nargs="*",
         type=str,
         help="The json file which you want to do formating.",
-        default="",
     )
     parser_type_format.add_argument(
         "--all", "-a", action="store_const", const=True, default=False
