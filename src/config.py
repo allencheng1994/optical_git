@@ -19,9 +19,56 @@ CONST = {
     "LOG": "log",
     "DATA": "data",
     "CRITERION": "criterion",
+    "YIELD_SETTING": "yield",
 }
 
 ONLY_PROGRAM = [CONST["DATA"], CONST["LOG"]]
+
+
+CODEV_LENS_SETTING_TEMPLATE = {
+    "file": "",
+    "plasticprv": "C:/CVUSER/plasticprv.seq",
+    "mode": "normal",
+    "material": [],
+    "mid": 0,
+    "imh": 0,
+    "line_pair": 0,
+    "field_sym": True,
+    "field_gen": [
+        0,
+        0.3,
+        0.6,
+        0.8,
+        0.9,
+        1,
+    ],
+    "field": [
+        0,
+        0.3,
+        0.6,
+        0.8,
+        0.9,
+        1,
+        -0.3,
+        -0.6,
+        -0.8,
+        -0.9,
+        -1,
+        0.3,
+        0.6,
+        0.8,
+        0.9,
+        1,
+        -0.3,
+        -0.6,
+        -0.8,
+        -0.9,
+        -1,
+    ],
+    "wavelength": [650, 610, 555, 510, 470],
+    "wavelength_weight": [107, 503, 1000, 503, 91],
+    "wavelength_line_color": ["RED", "RED", "CYA", "BLU", "MAG"],
+}
 
 
 # Logger Template in system
@@ -39,6 +86,7 @@ LOGGER_TEMPLATE = {
                 "pixel-size": None,
                 "cra-imh": None,
                 "process-type": None,
+                "yield-mode": "normal",
             },
             CONST["DATA"]: {
                 "op-dfov": None,
@@ -105,6 +153,7 @@ LOGGER_TEMPLATE = {
                 "mtf-outer": 0.6,
                 "mtf-mic": 0.2,
                 "tir": 35,
+                "boundary-list": [0.67, 0.47, 0, 0.38, 0, 0, 0.47, 0, 0.38, 0, 0],
             },
         },
         "COSTUME": {
