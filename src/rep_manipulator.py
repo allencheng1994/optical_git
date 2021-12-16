@@ -20,7 +20,9 @@ def repo_init(template: dict) -> None:
 
     Repo.init(Path.cwd())
     repo_path = Path.cwd().joinpath(config.CONST["OPTICAL-GIT"])
+    temp_path = repo_path.joinpath(config.CONST["OPTICAL-GIT-TEMP"])
     Path.mkdir(repo_path)
+    Path.mkdir(temp_path)
     for key_name in template:
         json_file = repo_path.joinpath(key_name + ".json")
         with open(json_file, "w", encoding="utf-8") as jfile:
@@ -199,30 +201,50 @@ def repo_change_tracking_file(file: str) -> None:
 
 def repo_pick_files(file_name: str, SHA_list: list, suffix: str) -> None:
     opt_repo = find_optical_repo_path()
+    temp_folder = opt_repo.joinpath(config.CONST.get("OPTICAL-GIT-TEMP"))
     for sha in SHA_list:
         SHA_file = sha + ":./" + file_name + suffix
         newname = file_name + "-" + sha + suffix
-        new_file = open(config.TEMP_FOLDER.joinpath(newname), "w+")
+        new_file = open(temp_folder.joinpath(newname), "w+")
         cmd = subprocess.call("git show " + SHA_file, cwd=opt_repo, stdout=new_file)
         new_file.close()
         if cmd:
-            os.remove(config.TEMP_FOLDER.joinpath(newname))
-            print(f"You didn't export the data when you commit at {sha}.")
+            os.remove(temp_folder.joinpath(newname))
+            raise FileNotFoundError(
+                f"You didn't export the data when you commit at {sha}."
+            )
 
 
 def repo_pick_design(SHA_list: list) -> None:
     opt_repo = find_optical_repo_path()
+    temp_folder = opt_repo.joinpath(config.CONST.get("OPTICAL-GIT-TEMP"))
     opt_repo = opt_repo.parent
     suffix = ".zmx"
     for sha in SHA_list:
         SHA_file = sha + ":./" + file_name + suffix
         newname = file_name + "-" + sha + suffix
-        new_file = open(config.TEMP_FOLDER.joinpath(newname), "w+")
+        new_file = open(temp_folder.joinpath(newname), "w+")
         cmd = subprocess.call("git show " + SHA_file, cwd=opt_repo, stdout=new_file)
         new_file.close()
         if cmd:
-            os.remove(config.TEMP_FOLDER.joinpath(newname))
-            print(f"The {sha} may not exist.")
+            os.remove(temp_folder.joinpath(newname))
+            raise FileNotFoundError(f"The {sha} may not exist.")
+
+
+def repo_fig_diff(file_name: str, SHA_list: list) -> None:
+    repo_pick_files(file_name, SHA_list, suffix=".png")
+    opt_repo = find_optical_repo_path()
+    temp_folder = opt_repo.joinpath(config.CONST.get("OPTICAL-GIT-TEMP"))
+    selected_file = [
+        temp_folder.joinpath(file_name + "-" + sha + ".png") for sha in SHA_list
+    ]
+    img = Image.open(str(selected_file[0]))
+    dst = Image.new("RGB", (img.width * len(selected_file), img.height))
+    del img
+    for i, file in enumerate(selected_file):
+        img = Image.open(str(selected_file[i]))
+        dst.paste(img, (i * img.width, 0))
+    dst.show()
 
 
 def repo_commit() -> None:

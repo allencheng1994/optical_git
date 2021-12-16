@@ -15,7 +15,9 @@ def go_extracting(args):
         file_path = None
     else:
         repo = find_optical_repo_path()
-        file_path = load_json_data(repo.joinpath("file.json"))["file"]
+        file_path = load_json_data(repo.joinpath(config.CONST["TRACKFILE"] + ".json"))[
+            "file"
+        ]
     log_data(file_path, args.refresh)
 
 
@@ -24,7 +26,9 @@ def go_exporting(args):
         file_path = None
     else:
         repo = find_optical_repo_path()
-        file_path = load_json_data(repo.joinpath("file.json"))["file"]
+        file_path = load_json_data(repo.joinpath(config.CONST["TRACKFILE"] + ".json"))[
+            "file"
+        ]
     export_figs(file_path)
 
 
@@ -66,6 +70,13 @@ def repository_show_fig(args):
         rep_manipulator.repo_show_figs()
     else:
         rep_manipulator.repo_show_fig(args.figure)
+
+
+def repository_diff_fig(args):
+    try:
+        rep_manipulator.repo_fig_diff(args.item, args.sha)
+    except FileNotFoundError as e:
+        print(e)
 
 
 def repository_add(args):
@@ -298,10 +309,10 @@ def main():
     parser_pick_figs = subparsers.add_parser(
         "pick-fig",
         aliases=["pf"],
-        help="copy the specific file from the specific version.",
+        help="copy the specific figure from the specific version.",
     )
 
-    parser_pick_figs.add_argument("file", type=str, help="target")
+    parser_pick_figs.add_argument("figure", type=str, help="target")
     parser_pick_figs.add_argument(
         "sha",
         nargs="+",
@@ -309,6 +320,20 @@ def main():
         help="The SHA or tag's value of the specific version. However, using tags is much better.",
     )
     parser_pick_figs.set_defaults(func=repository_pick_figs)
+
+    parser_diff_figs = subparsers.add_parser(
+        "diff-fig",
+        aliases=["df"],
+        help="Compare the data figure between specifc version",
+    )
+    parser_diff_figs.add_argument("item", type=str, help="target")
+    parser_diff_figs.add_argument(
+        "sha",
+        nargs="+",
+        type=str,
+        help="The SHA or tag's value of the specific version. However, using tags is much better.",
+    )
+    parser_diff_figs.set_defaults(func=repository_diff_fig)
 
     args = parser.parse_args()
     args.func(args)

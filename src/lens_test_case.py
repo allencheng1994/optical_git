@@ -46,7 +46,9 @@ def exc_projection_lens_test(show_skipped_list=False):
             expected = spec_data["ri"]
             self.assertGreaterEqual(ri, expected)
 
-        @unittest.skipIf(lens_data.get("wfno") is None, skip_msg)
+        @unittest.skipIf(
+            lens_data.get("wfno") is None or spec_data.get("fno") is None, skip_msg
+        )
         def test_wfno(self):
             wfno = lens_data["wfno"]
             expected = spec_data["fno"]

@@ -1,12 +1,29 @@
 import json
 import sys
 import re
+import pyzdde.zdde as pyz
 from pathlib import Path
-from .config import CONST
 from wand.image import Image
+from .config import CONST
 
 
-def convert_wmf(img, filetype="png"):
+class Zemax14(object):
+    """docstring for Zemax14"""
+
+    def __init__(self, file):
+        self._file = file
+
+    def __enter__(self):
+        self._channel = pyz.createLink()
+        if self._file:
+            self._channel.zLoadFile(self._file)
+        return self._channel
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        pyz.closeLink()
+
+
+def convert_wmf(img: Path, filetype: str = "png") -> None:
     filepath = img.resolve()
     parent = filepath.parent
     newfilename = re.sub(".wmf", "", filepath.name)
@@ -17,13 +34,13 @@ def convert_wmf(img, filetype="png"):
     img.unlink(missing_ok=True)
 
 
-def load_json_data(json_file):
+def load_json_data(json_file: Path) -> dict:
     with open(json_file, "r", encoding="utf-8") as f:
         data = json.load(f)
     return data
 
 
-def is_number(val_str):
+def is_number(val_str: str) -> bool:
     try:
         float(val_str)
         return True
@@ -31,7 +48,7 @@ def is_number(val_str):
         return False
 
 
-def exist_optical_repo():
+def exist_optical_repo() -> bool:
     current_path = Path.cwd()
     while current_path.parent != current_path:
         if current_path.joinpath(CONST["OPTICAL-GIT"]).exists():
@@ -42,7 +59,7 @@ def exist_optical_repo():
     return False
 
 
-def find_optical_repo_path():
+def find_optical_repo_path() -> Path:
     current_path = Path.cwd()
     while current_path.parent != current_path:
         if current_path.joinpath(CONST["OPTICAL-GIT"]).exists():

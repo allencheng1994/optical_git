@@ -10,6 +10,7 @@ TEMP_FOLDER = INSTALLED_FOLDER.joinpath("temp/")
 # The constant variable in system
 CONST = {
     "OPTICAL-GIT": ".optical-git",
+    "OPTICAL-GIT-TEMP": "temp",
     "TRACKFILE": "file",
     "CHANGE-NOTE": "change-note",
     "ENVIRONMENT": "environment",
